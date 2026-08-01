@@ -22,6 +22,7 @@ function ProductsContent() {
   const [selectedGender, setSelectedGender] = useState("All Genders");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     if (initialGrade) {
@@ -93,7 +94,16 @@ function ProductsContent() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-500">Sort by:</span>
+          {/* Mobile Filter Toggle Button */}
+          <button
+            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+            className="lg:hidden px-3.5 py-2 bg-blue-900 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs"
+          >
+            <Filter className="w-4 h-4 text-amber-300" />
+            <span>{isMobileFilterOpen ? "Hide Filters" : "Filter Products"}</span>
+          </button>
+
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -109,8 +119,10 @@ function ProductsContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT FILTERS SIDEBAR */}
-        <aside className="lg:col-span-3 space-y-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs h-fit">
+        {/* LEFT FILTERS SIDEBAR (Responsive drawer on mobile/tablet, fixed on desktop) */}
+        <aside className={`lg:col-span-3 space-y-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs h-fit ${
+          isMobileFilterOpen ? "block" : "hidden lg:block"
+        }`}>
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h2 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
               <Filter className="w-4 h-4 text-blue-900" /> Filter Criteria
@@ -159,7 +171,10 @@ function ProductsContent() {
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setIsMobileFilterOpen(false);
+                  }}
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                     selectedCategory === cat
                       ? "bg-blue-900 text-white"
@@ -237,7 +252,7 @@ function ProductsContent() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filtered.map((product) => (
                 <ProductCard key={product.id || product._id} product={product} />
               ))}

@@ -234,78 +234,83 @@ export default function ProfilePage() {
         {/* Dashboard Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
-          {/* Left Sidebar Navigation */}
+          {/* Left Sidebar Navigation (Horizontal Pill Scroll on mobile, vertical sidebar on desktop) */}
           <div className="lg:col-span-1 space-y-2">
-            <div className="bg-white rounded-2xl p-3 border border-slate-200 shadow-xs space-y-1">
+            <div className="bg-white rounded-2xl p-2 sm:p-3 border border-slate-200 shadow-xs flex lg:flex-col overflow-x-auto no-scrollbar gap-1.5 lg:space-y-1">
               
               <button
                 onClick={() => setActiveTab("orders")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[160px] lg:min-w-0 flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                   activeTab === "orders"
                     ? "bg-blue-900 text-white shadow-md"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 bg-slate-50 lg:bg-transparent"
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <Package className="w-4 h-4 text-amber-300" /> My Orders & Live Status
+                <span className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span className="whitespace-nowrap">My Orders</span>
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <ChevronRight className="w-4 h-4 opacity-70 hidden lg:block" />
               </button>
 
               <button
                 onClick={() => setActiveTab("info")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[160px] lg:min-w-0 flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                   activeTab === "info"
                     ? "bg-blue-900 text-white shadow-md"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 bg-slate-50 lg:bg-transparent"
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <User className="w-4 h-4 text-amber-300" /> Personal Information
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span className="whitespace-nowrap">Personal Info</span>
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <ChevronRight className="w-4 h-4 opacity-70 hidden lg:block" />
               </button>
 
               <button
                 onClick={() => setActiveTab("addresses")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[160px] lg:min-w-0 flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                   activeTab === "addresses"
                     ? "bg-blue-900 text-white shadow-md"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 bg-slate-50 lg:bg-transparent"
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <MapPin className="w-4 h-4 text-amber-300" /> Manage Delivery Addresses
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span className="whitespace-nowrap">Addresses</span>
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <ChevronRight className="w-4 h-4 opacity-70 hidden lg:block" />
               </button>
 
               <button
                 onClick={() => setActiveTab("payments")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[160px] lg:min-w-0 flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                   activeTab === "payments"
                     ? "bg-blue-900 text-white shadow-md"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 bg-slate-50 lg:bg-transparent"
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <CreditCard className="w-4 h-4 text-amber-300" /> Saved Cards & UPI
+                <span className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span className="whitespace-nowrap">Saved Cards & UPI</span>
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <ChevronRight className="w-4 h-4 opacity-70 hidden lg:block" />
               </button>
 
               <button
                 onClick={() => setActiveTab("wishlist")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[160px] lg:min-w-0 flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                   activeTab === "wishlist"
                     ? "bg-blue-900 text-white shadow-md"
-                    : "text-slate-700 hover:bg-slate-100"
+                    : "text-slate-700 hover:bg-slate-100 bg-slate-50 lg:bg-transparent"
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <Heart className="w-4 h-4 text-amber-300" /> Wishlist & Saved Kits
+                <span className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span className="whitespace-nowrap">Wishlist</span>
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-70" />
+                <ChevronRight className="w-4 h-4 opacity-70 hidden lg:block" />
               </button>
 
             </div>

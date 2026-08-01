@@ -322,6 +322,29 @@ export default function ProductDetailPage({ params }) {
 
       </div>
 
+      {/* Mobile Sticky Quick Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-3 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
+        <div className="flex-1">
+          <p className="text-[10px] text-slate-400 font-semibold uppercase">Total Price</p>
+          <p className="text-base font-black text-slate-900 leading-tight">₹{product.price.toLocaleString("en-IN")}</p>
+        </div>
+        <button
+          onClick={handleAddToCart}
+          className={`py-3 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm ${
+            isAdded ? "bg-emerald-600 text-white" : "bg-blue-900 text-white"
+          }`}
+        >
+          {isAdded ? <Check className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4 text-amber-300" />}
+          <span>{isAdded ? "Added!" : "Add to Cart"}</span>
+        </button>
+        <button
+          onClick={handleBuyNow}
+          className="py-3 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-black text-xs shadow-sm transition-all"
+        >
+          Buy Now
+        </button>
+      </div>
+
       <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} />
     </div>
   );

@@ -13,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="light">
-      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between">
+      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between overflow-x-hidden w-full">
         <AuthProvider>
           <CartProvider>
             <Navbar />
