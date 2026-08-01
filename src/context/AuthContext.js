@@ -14,10 +14,26 @@ export function AuthProvider({ children }) {
     try {
       const savedUser = localStorage.getItem("sos_auth_user");
       if (savedUser) {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        if (
+          parsed?.email === "parent@schoolofscholars.edu" ||
+          parsed?.name?.includes("Suresh") ||
+          parsed?.id === "usr-parent-1"
+        ) {
+          localStorage.removeItem("sos_auth_user");
+          localStorage.removeItem("sos_student");
+          localStorage.removeItem("sos_cart");
+          setUser(null);
+        } else {
+          setUser(parsed);
+        }
       }
     } catch (e) {
       console.error("Failed to load saved user session:", e);
+      try {
+        localStorage.removeItem("sos_auth_user");
+      } catch (err) {}
+      setUser(null);
     }
   }, []);
 

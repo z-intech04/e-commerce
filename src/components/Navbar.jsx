@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -39,6 +39,25 @@ export default function Navbar() {
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Dropdown menu state & refs for stable click and hover
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const moreMenuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setIsMoreMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Live Auto Search fetching
   useEffect(() => {
@@ -214,13 +233,17 @@ export default function Navbar() {
             {/* ACTION ICONS SECTION (Login v, More v, Cart) */}
             <div className="flex items-center gap-4 sm:gap-6 shrink-0">
               
-              {/* 1. LOGIN DROPDOWN */}
-              <div className="relative group">
+              {/* 1. LOGIN / USER DROPDOWN */}
+              <div ref={userMenuRef} className="relative group">
                 {user ? (
-                  <button className="flex items-center gap-1.5 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2">
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    onMouseEnter={() => setIsUserMenuOpen(true)}
+                    className="flex items-center gap-1.5 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2 focus:outline-none"
+                  >
                     <User className="w-4.5 h-4.5 text-slate-700" />
                     <span className="max-w-[90px] truncate">{user.name}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-500 transition-transform group-hover:rotate-180" />
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isUserMenuOpen ? "rotate-180 text-[#2874f0]" : "group-hover:rotate-180"}`} />
                   </button>
                 ) : (
                   <button
@@ -228,130 +251,168 @@ export default function Navbar() {
                       setAuthMode("login");
                       setIsAuthModalOpen(true);
                     }}
-                    className="flex items-center gap-1.5 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2 relative"
+                    onMouseEnter={() => setIsUserMenuOpen(true)}
+                    className="flex items-center gap-1.5 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2 relative focus:outline-none"
                   >
                     <User className="w-4.5 h-4.5 text-slate-700" />
                     <span>Login</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-500 transition-transform group-hover:rotate-180" />
-
-                    {/* Blue Hover Badge */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-1 bg-[#2874f0] text-white font-bold text-[11px] rounded-md shadow-lg hidden group-hover:flex items-center gap-1 whitespace-nowrap z-50 animate-in fade-in">
-                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#2874f0] rotate-45" />
-                      Login
-                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isUserMenuOpen ? "rotate-180 text-[#2874f0]" : "group-hover:rotate-180"}`} />
                   </button>
                 )}
 
-                {/* Login Popover */}
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl hidden group-hover:block z-50 animate-in fade-in duration-150 overflow-hidden">
-                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                      {user ? (
-                        <>
-                          <p className="text-xs font-extrabold text-slate-900">{user.name}</p>
-                          <p className="text-[10px] font-medium text-slate-500 truncate max-w-[130px]">{user.email}</p>
-                        </>
-                      ) : (
-                        <p className="text-xs font-extrabold text-slate-900">New customer?</p>
-                      )}
-                    </div>
-                    {!user && (
-                      <button
-                        onClick={() => {
-                          setAuthMode("register");
-                          setIsAuthModalOpen(true);
-                        }}
-                        className="px-3 py-1 bg-[#2874f0] text-white font-bold text-xs rounded-md shadow-xs hover:bg-blue-600 transition-colors"
-                      >
-                        Sign Up
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="p-1 text-xs font-semibold text-slate-800 divide-y divide-slate-100">
-                    <div className="py-1">
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-slate-900 rounded-xl transition-colors"
-                      >
-                        <User className="w-4 h-4 text-[#2874f0]" />
-                        <span>My Profile & Account</span>
-                      </Link>
-
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-slate-900 rounded-xl transition-colors"
-                      >
-                        <Package className="w-4 h-4 text-[#2874f0]" />
-                        <span className="font-bold text-blue-950">Orders & Live Tracking</span>
-                      </Link>
-
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-slate-900 rounded-xl transition-colors"
-                      >
-                        <Heart className="w-4 h-4 text-red-500" />
-                        <span>Wishlist & Saved Kits</span>
-                      </Link>
-                    </div>
-
-                    <div className="py-1">
-                      {user && (
+                {/* Popover Dropdown Menu with Hover Bridge */}
+                <div 
+                  onMouseLeave={() => setIsUserMenuOpen(false)}
+                  className={`absolute right-0 top-full pt-2 z-50 transition-all duration-200 ${
+                    isUserMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
+                  }`}
+                >
+                  <div className="w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                      <div>
+                        {user ? (
+                          <>
+                            <p className="text-xs font-extrabold text-slate-900">{user.name}</p>
+                            <p className="text-[10px] font-medium text-slate-500 truncate max-w-[130px]">{user.email}</p>
+                          </>
+                        ) : (
+                          <p className="text-xs font-extrabold text-slate-900">New customer?</p>
+                        )}
+                      </div>
+                      {!user && (
                         <button
-                          onClick={logout}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-600 rounded-xl font-bold transition-colors"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setAuthMode("register");
+                            setIsAuthModalOpen(true);
+                          }}
+                          className="px-3 py-1 bg-[#2874f0] text-white font-bold text-xs rounded-md shadow-xs hover:bg-blue-600 transition-colors"
                         >
-                          <LogOut className="w-4 h-4 text-red-600" />
-                          <span>Sign Out</span>
+                          Sign Up
                         </button>
                       )}
+                    </div>
+
+                    <div className="p-1 text-xs font-semibold text-slate-800 divide-y divide-slate-100">
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-slate-900 rounded-xl transition-colors"
+                        >
+                          <User className="w-4 h-4 text-[#2874f0]" />
+                          <span>My Profile & Account</span>
+                        </Link>
+
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-slate-900 rounded-xl transition-colors"
+                        >
+                          <Package className="w-4 h-4 text-[#2874f0]" />
+                          <span className="font-bold text-blue-950">Orders & Live Tracking</span>
+                        </Link>
+
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-slate-900 rounded-xl transition-colors"
+                        >
+                          <Heart className="w-4 h-4 text-red-500" />
+                          <span>Wishlist & Saved Kits</span>
+                        </Link>
+                      </div>
+
+                      <div className="py-1">
+                        {user ? (
+                          <button
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              logout();
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 text-red-600 rounded-xl font-bold transition-colors text-left"
+                          >
+                            <LogOut className="w-4 h-4 text-red-600" />
+                            <span>Sign Out</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              setAuthMode("login");
+                              setIsAuthModalOpen(true);
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 text-blue-900 rounded-xl font-bold transition-colors text-left"
+                          >
+                            <LogIn className="w-4 h-4 text-[#2874f0]" />
+                            <span>Sign In to Account</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 2. MORE DROPDOWN (As Shown in Screenshot) */}
-              <div className="relative group hidden sm:block">
-                <button className="flex items-center gap-1 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2">
+              {/* 2. MORE DROPDOWN */}
+              <div ref={moreMenuRef} className="relative group hidden sm:block">
+                <button 
+                  onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+                  onMouseEnter={() => setIsMoreMenuOpen(true)}
+                  className="flex items-center gap-1 text-slate-800 hover:text-[#2874f0] text-sm font-bold transition-colors py-2 focus:outline-none"
+                >
                   <span>More</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500 transition-transform group-hover:rotate-180" />
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isMoreMenuOpen ? "rotate-180 text-[#2874f0]" : "group-hover:rotate-180"}`} />
                 </button>
 
-                {/* More Menu Popover */}
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-2xl hidden group-hover:block z-50 p-2 animate-in fade-in duration-150">
-                  <Link
-                    href="/track-order"
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-amber-50 text-slate-900 text-xs font-bold rounded-xl transition-colors"
-                  >
-                    <Truck className="w-4 h-4 text-amber-600" />
-                    <span>Track Order by ID</span>
-                  </Link>
-
-                  <a
-                    href="tel:+9102024567890"
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl"
-                  >
-                    <Headphones className="w-4 h-4 text-[#2874f0]" />
-                    <span>Customer Support</span>
-                  </a>
-
-                  <button
-                    onClick={() => setIsGradeModalOpen(true)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl text-left"
-                  >
-                    <SlidersHorizontal className="w-4 h-4 text-slate-600" />
-                    <span>Grade: {selectedGrade}</span>
-                  </button>
-
-                  {user?.role === "admin" && (
+                {/* More Menu Popover with Hover Bridge */}
+                <div 
+                  onMouseLeave={() => setIsMoreMenuOpen(false)}
+                  className={`absolute right-0 top-full pt-2 z-50 transition-all duration-200 ${
+                    isMoreMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto"
+                  }`}
+                >
+                  <div className="w-56 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2">
                     <Link
-                      href="/admin"
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-purple-50 text-purple-900 text-xs font-extrabold rounded-xl"
+                      href="/track-order"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-amber-50 text-slate-900 text-xs font-bold rounded-xl transition-colors"
                     >
-                      <ShieldCheck className="w-4 h-4 text-purple-700" />
-                      <span>Admin Control Panel</span>
+                      <Truck className="w-4 h-4 text-amber-600" />
+                      <span>Track Order by ID</span>
                     </Link>
-                  )}
+
+                    <a
+                      href="tel:+9102024567890"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl"
+                    >
+                      <Headphones className="w-4 h-4 text-[#2874f0]" />
+                      <span>Customer Support</span>
+                    </a>
+
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        setIsGradeModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl text-left"
+                    >
+                      <SlidersHorizontal className="w-4 h-4 text-slate-600" />
+                      <span>Grade: {selectedGrade}</span>
+                    </button>
+
+                    {user?.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 hover:bg-purple-50 text-purple-900 text-xs font-extrabold rounded-xl"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-purple-700" />
+                        <span>Admin Control Panel</span>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
 
