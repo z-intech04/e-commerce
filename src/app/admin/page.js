@@ -13,7 +13,8 @@ import {
   Database, 
   Sparkles,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Trash2
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -21,6 +22,7 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [seedMessage, setSeedMessage] = useState("");
 
   const fetchData = async () => {
@@ -63,6 +65,28 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleClearAllData = async () => {
+    if (!confirm("Are you sure you want to delete ALL store data (products, orders, temporary records)? This allows starting completely fresh from scratch to prevent sample data leaks.")) {
+      return;
+    }
+    setIsClearing(true);
+    setSeedMessage("");
+    try {
+      const res = await fetch("/api/admin/clear-all", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setSeedMessage(data.message);
+        await fetchData();
+      } else {
+        setSeedMessage(data.error || "Failed to clear data.");
+      }
+    } catch (e) {
+      setSeedMessage("Error connecting to server to clear data.");
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const totalRevenue = orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0);
 
   return (
@@ -84,14 +108,25 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
 
-              <button
-                onClick={handleSeedData}
-                disabled={isSeeding}
-                className="px-4 py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl text-xs hover:bg-amber-400 transition-all shadow-md flex items-center gap-2"
-              >
-                {isSeeding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-                <span>Restore Demo Inventory</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleClearAllData}
+                  disabled={isClearing}
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-md flex items-center gap-2"
+                >
+                  {isClearing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  <span>Wipe All Data (Start Fresh)</span>
+                </button>
+
+                <button
+                  onClick={handleSeedData}
+                  disabled={isSeeding}
+                  className="px-4 py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl text-xs hover:bg-amber-400 transition-all shadow-md flex items-center gap-2"
+                >
+                  {isSeeding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+                  <span>Restore Demo Inventory</span>
+                </button>
+              </div>
             </div>
 
             {seedMessage && (

@@ -9,12 +9,14 @@ export async function POST() {
 
     if (conn) {
       await Product.deleteMany({});
-      await Product.insertMany(INITIAL_PRODUCTS);
-      return NextResponse.json({ success: true, message: "MongoDB seeded successfully with 12 items!" });
+      if (INITIAL_PRODUCTS.length > 0) {
+        await Product.insertMany(INITIAL_PRODUCTS);
+      }
+      return NextResponse.json({ success: true, message: `Database reset successfully with ${INITIAL_PRODUCTS.length} initial items!` });
     } else {
       const db = getInMemoryDB();
       db.products = [...INITIAL_PRODUCTS];
-      return NextResponse.json({ success: true, message: "In-memory database re-seeded successfully!" });
+      return NextResponse.json({ success: true, message: `In-memory database reset successfully with ${INITIAL_PRODUCTS.length} items!` });
     }
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

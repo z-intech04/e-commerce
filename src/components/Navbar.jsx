@@ -27,6 +27,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import GradeSelectorModal from "./GradeSelectorModal";
 import AuthModal from "./AuthModal";
+import LocationModal, { getStoredLocation, autoDetectLocationSilent } from "./LocationModal";
 
 export default function Navbar() {
   const router = useRouter();
@@ -34,11 +35,34 @@ export default function Navbar() {
   const { user, logout, setIsAuthModalOpen, setAuthMode } = useAuth();
   
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState("Location not set");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Sync location with user session: reset to "Location not set" on logout
+  useEffect(() => {
+    if (!user) {
+      setUserLocation("Location not set");
+      try {
+        localStorage.removeItem("sos_user_location");
+      } catch (e) {}
+    } else {
+      const stored = getStoredLocation();
+      if (stored && stored !== "Location not set") {
+        setUserLocation(stored);
+      } else {
+        autoDetectLocationSilent((detectedLoc) => {
+          if (detectedLoc) {
+            setUserLocation(detectedLoc);
+          }
+        });
+      }
+    }
+  }, [user]);
 
   // Dropdown menu state & refs for stable click and hover
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -118,17 +142,19 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Location Delivery Selector (Exact Screenshot Match) */}
+          {/* Non-clickable Live Location Indicator */}
           <div className="flex items-center gap-1.5 text-xs text-slate-700 font-medium">
-            <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
-            <span>Location not set</span>
-            <button 
-              onClick={() => setIsGradeModalOpen(true)}
-              className="text-[#2874f0] font-bold text-xs hover:underline flex items-center gap-0.5"
-            >
-              <span>Select delivery location</span>
-              <span>&gt;</span>
-            </button>
+            <MapPin className="w-4 h-4 text-blue-900 shrink-0" />
+            {userLocation !== "Location not set" ? (
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-slate-600">Deliver to:</span>
+                <span className="font-black text-blue-950 bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 text-xs">
+                  {userLocation}
+                </span>
+              </div>
+            ) : (
+              <span className="text-slate-500 font-bold">Location not set</span>
+            )}
           </div>
 
         </div>
@@ -480,6 +506,14 @@ export default function Navbar() {
 
       {/* Auth Modal */}
       <AuthModal />
+
+      {/* Location Delivery Selector Modal */}
+      <LocationModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
+        currentLocation={userLocation}
+        onLocationSelect={(loc) => setUserLocation(loc)}
+      />
     </>
   );
 }

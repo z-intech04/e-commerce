@@ -24,24 +24,40 @@ export default function AuthModal() {
 
   if (!isAuthModalOpen) return null;
 
+  const handleClose = () => {
+    setIsAuthModalOpen(false);
+    setAuthError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    let res;
     if (authMode === "login") {
-      await login(email, password);
+      res = await login(email, password);
     } else {
-      await register(name, email, password, phone);
+      res = await register(name, email, password, phone);
     }
     setLoading(false);
+    if (res?.success) {
+      setEmail("");
+      setPassword("");
+      setName("");
+      setPhone("");
+    }
   };
 
   const handleQuickFillAdmin = async () => {
     setEmail("admin@schoolofscholars.edu");
     setPassword("admin123");
     setLoading(true);
-    await login("admin@schoolofscholars.edu", "admin123");
+    const res = await login("admin@schoolofscholars.edu", "admin123");
     setLoading(false);
+    if (res?.success) {
+      setEmail("");
+      setPassword("");
+    }
   };
 
   return (
@@ -50,7 +66,7 @@ export default function AuthModal() {
         
         {/* Close Button */}
         <button
-          onClick={() => setIsAuthModalOpen(false)}
+          onClick={handleClose}
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
         >
           <X className="w-5 h-5" />

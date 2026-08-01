@@ -188,6 +188,16 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleClearProducts = async () => {
+    if (!confirm("Are you sure you want to delete ALL products from store catalog? You can then add new products from scratch.")) return;
+    try {
+      await fetch("/api/products", { method: "DELETE" });
+      await fetchProducts();
+    } catch (e) {
+      alert("Failed to clear products.");
+    }
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -292,12 +302,21 @@ export default function AdminProductsPage() {
                 </p>
               </div>
 
-              <button
-                onClick={handleOpenAddModal}
-                className="px-4 sm:px-5 py-2.5 sm:py-3 bg-purple-700 hover:bg-purple-800 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-2 shrink-0"
-              >
-                <Plus className="w-4 h-4 text-amber-300" /> Add New Product
-              </button>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={handleClearProducts}
+                  className="px-4 py-2.5 sm:py-3 bg-red-50 text-red-700 hover:bg-red-100 font-extrabold rounded-2xl text-xs transition-all border border-red-200 flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4 text-red-600" /> Clear Catalog
+                </button>
+
+                <button
+                  onClick={handleOpenAddModal}
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 bg-purple-700 hover:bg-purple-800 text-white font-extrabold rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4 text-amber-300" /> Add New Product
+                </button>
+              </div>
             </div>
 
             {/* CLASS / GRADE CATEGORY TAB SELECTOR */}

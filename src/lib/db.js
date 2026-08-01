@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { INITIAL_PRODUCTS } from "./seedData";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/school_of_scholars";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Global in-memory cache for fallback when MongoDB Compass is offline
 if (!global._inMemoryDB) {

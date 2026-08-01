@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { 
   LayoutDashboard, 
   Package, 
@@ -11,11 +12,13 @@ import {
   ArrowLeft,
   Menu,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  LogOut
 } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const links = [
@@ -125,6 +128,12 @@ export default function AdminSidebar() {
           >
             <ArrowLeft className="w-4 h-4 text-amber-400" /> Back to Storefront
           </Link>
+          <button
+            onClick={() => logout()}
+            className="w-full flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-300 transition-colors pt-1 text-left"
+          >
+            <LogOut className="w-4 h-4 text-red-400" /> Sign Out Admin
+          </button>
         </div>
       </aside>
     </>

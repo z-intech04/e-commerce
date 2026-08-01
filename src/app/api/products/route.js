@@ -74,3 +74,18 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      await Product.deleteMany({});
+    }
+    const db = getInMemoryDB();
+    db.products = [];
+    return NextResponse.json({ success: true, message: "All products deleted successfully." });
+  } catch (error) {
+    console.error("Products DELETE error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

@@ -15,16 +15,7 @@ export function AuthProvider({ children }) {
       const savedUser = localStorage.getItem("sos_auth_user");
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
-        if (
-          parsed?.email === "parent@schoolofscholars.edu" ||
-          parsed?.name?.includes("Suresh") ||
-          parsed?.id === "usr-parent-1"
-        ) {
-          localStorage.removeItem("sos_auth_user");
-          localStorage.removeItem("sos_student");
-          localStorage.removeItem("sos_cart");
-          setUser(null);
-        } else {
+        if (parsed && typeof parsed === "object") {
           setUser(parsed);
         }
       }
@@ -39,11 +30,12 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     setAuthError("");
+    const cleanEmail = email ? email.trim() : "";
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email, password })
+        body: JSON.stringify({ action: "login", email: cleanEmail, password })
       });
       const data = await res.json();
 
@@ -52,7 +44,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem("sos_auth_user", JSON.stringify(data.user));
         setIsAuthModalOpen(false);
         setAuthError("");
-        return { success: true };
+        return { success: true, user: data.user };
       } else {
         setAuthError(data.message || "Invalid credentials.");
         return { success: false, message: data.message };
@@ -65,11 +57,14 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password, phone = "") => {
     setAuthError("");
+    const cleanName = name ? name.trim() : "";
+    const cleanEmail = email ? email.trim() : "";
+    const cleanPhone = phone ? phone.trim() : "";
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "register", name, email, password, phone })
+        body: JSON.stringify({ action: "register", name: cleanName, email: cleanEmail, password, phone: cleanPhone })
       });
       const data = await res.json();
 
@@ -78,7 +73,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem("sos_auth_user", JSON.stringify(data.user));
         setIsAuthModalOpen(false);
         setAuthError("");
-        return { success: true };
+        return { success: true, user: data.user };
       } else {
         setAuthError(data.message || "Registration failed.");
         return { success: false, message: data.message };
@@ -91,7 +86,19 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("sos_auth_user");
+    setAuthError("");
+    setIsAuthModalOpen(false);
+    try {
+      localStorage.removeItem("sos_auth_user");
+      localStorage.removeItem("sos_cart");
+      localStorage.removeItem("sos_student");
+      localStorage.removeItem("sos_user_location");
+    } catch (e) {
+      console.error("Failed to remove saved user session:", e);
+    }
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   };
 
   // Helper method to guard actions: returns true if logged in, or opens AuthModal if not

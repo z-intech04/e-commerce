@@ -1,10 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user, requireAuth } = useAuth();
   const [cart, setCart] = useState([]);
   const [selectedGrade, setSelectedGrade] = useState("All Classes");
   const [studentInfo, setStudentInfo] = useState({
@@ -20,34 +22,91 @@ export function CartProvider({ children }) {
     landmark: ""
   });
 
-  // Load cart from localStorage on mount
+  const getCartKey = (u) => (u?.email ? `sos_cart_${u.email.toLowerCase()}` : null);
+  const getStudentKey = (u) => (u?.email ? `sos_student_${u.email.toLowerCase()}` : null);
+
+  // Sync cart state whenever user changes (login / logout)
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem("sos_cart");
-      if (savedCart) setCart(JSON.parse(savedCart));
+      // Purge any legacy un-scoped sos_cart key
+      localStorage.removeItem("sos_cart");
+      localStorage.removeItem("sos_student");
 
-      const savedStudent = localStorage.getItem("sos_student");
-      if (savedStudent) setStudentInfo(JSON.parse(savedStudent));
+      if (user?.email) {
+        const userCartKey = getCartKey(user);
+        const savedCart = localStorage.getItem(userCartKey);
+        if (savedCart) {
+          setCart(JSON.parse(savedCart));
+        } else {
+          setCart([]);
+        }
+
+        const userStudentKey = getStudentKey(user);
+        const savedStudent = localStorage.getItem(userStudentKey);
+        if (savedStudent) {
+          setStudentInfo(JSON.parse(savedStudent));
+        } else {
+          setStudentInfo({
+            studentName: user?.name || "",
+            rollNo: "",
+            classGrade: "Class 5",
+            section: "A",
+            parentPhone: user?.phone || "",
+            deliveryAddress: "",
+            deliveryType: "Home Delivery",
+            pincode: "400001",
+            city: "Mumbai",
+            landmark: ""
+          });
+        }
+      } else {
+        // User logged out / not logged in: force cart to empty []
+        setCart([]);
+        setStudentInfo({
+          studentName: "",
+          rollNo: "",
+          classGrade: "Class 5",
+          section: "A",
+          parentPhone: "",
+          deliveryAddress: "",
+          deliveryType: "Home Delivery",
+          pincode: "400001",
+          city: "Mumbai",
+          landmark: ""
+        });
+      }
 
       const savedGrade = localStorage.getItem("sos_selected_grade");
       if (savedGrade) setSelectedGrade(savedGrade);
     } catch (e) {
       console.error("Failed to parse stored cart state:", e);
+      setCart([]);
     }
-  }, []);
+  }, [user]);
 
-  // Save cart changes
+  // Save cart changes per user
   useEffect(() => {
     try {
-      localStorage.setItem("sos_cart", JSON.stringify(cart));
+      if (user?.email) {
+        const userCartKey = getCartKey(user);
+        localStorage.setItem(userCartKey, JSON.stringify(cart));
+      } else {
+        localStorage.removeItem("sos_cart");
+        localStorage.removeItem("sos_cart_guest");
+      }
     } catch (e) {}
-  }, [cart]);
+  }, [cart, user]);
 
   useEffect(() => {
     try {
-      localStorage.setItem("sos_student", JSON.stringify(studentInfo));
+      if (user?.email) {
+        const userStudentKey = getStudentKey(user);
+        localStorage.setItem(userStudentKey, JSON.stringify(studentInfo));
+      } else {
+        localStorage.removeItem("sos_student");
+      }
     } catch (e) {}
-  }, [studentInfo]);
+  }, [studentInfo, user]);
 
   useEffect(() => {
     try {
@@ -56,6 +115,13 @@ export function CartProvider({ children }) {
   }, [selectedGrade]);
 
   const addToCart = (product, size = "Standard", quantity = 1, customName = "") => {
+    if (!user?.email) {
+      if (requireAuth) {
+        requireAuth("register", "Please register or sign in to add items to your cart.");
+      }
+      return;
+    }
+
     setCart((prev) => {
       const existingIndex = prev.findIndex(
         (item) => item.product.id === product.id && item.selectedSize === size
@@ -91,22 +157,32 @@ export function CartProvider({ children }) {
 
   const clearCart = () => {
     setCart([]);
+    try {
+      if (user?.email) {
+        localStorage.removeItem(getCartKey(user));
+      }
+      localStorage.removeItem("sos_cart");
+      localStorage.removeItem("sos_cart_guest");
+    } catch (e) {}
   };
 
-  const totalItemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  // Only expose cart items if user is authenticated via email
+  const activeCart = user?.email ? cart : [];
 
-  const subtotal = cart.reduce(
+  const totalItemsCount = activeCart.reduce((acc, item) => acc + item.quantity, 0);
+
+  const subtotal = activeCart.reduce(
     (acc, item) => acc + item.product.price * item.quantity + (item.customName ? 50 * item.quantity : 0),
     0
   );
 
-  const deliveryFee = studentInfo.deliveryType === "School Pickup" || subtotal > 1999 ? 0 : 99;
-  const grandTotal = subtotal + deliveryFee;
+  const deliveryFee = activeCart.length === 0 || studentInfo.deliveryType === "School Pickup" || subtotal > 1999 ? 0 : 99;
+  const grandTotal = activeCart.length === 0 ? 0 : subtotal + deliveryFee;
 
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: activeCart,
         addToCart,
         removeFromCart,
         updateQuantity,

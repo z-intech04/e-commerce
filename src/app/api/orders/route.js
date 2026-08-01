@@ -96,3 +96,18 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      await Order.deleteMany({});
+    }
+    const db = getInMemoryDB();
+    db.orders = [];
+    return NextResponse.json({ success: true, message: "All orders cleared successfully." });
+  } catch (error) {
+    console.error("Orders DELETE error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
