@@ -19,6 +19,11 @@ export async function POST(request) {
   try {
     const { action, name, email, password, phone } = await request.json();
 
+    // Ensure unwanted test user data is permanently excluded
+    global._inMemoryUsers = global._inMemoryUsers.filter(
+      (u) => u.email !== "parent@schoolofscholars.edu" && u.name !== "Suresh Sharma"
+    );
+
     const users = global._inMemoryUsers;
 
     if (action === "register") {

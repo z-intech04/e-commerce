@@ -168,7 +168,7 @@ export default function AuthModal() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="parent@domain.com or admin@schoolofscholars.edu"
+                placeholder="your.email@example.com or admin@schoolofscholars.edu"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-900 font-semibold"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />

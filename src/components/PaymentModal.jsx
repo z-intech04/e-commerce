@@ -28,7 +28,7 @@ export default function PaymentModal({ isOpen, onClose }) {
   const { cart, subtotal, deliveryFee, grandTotal, studentInfo, clearCart } = useCart();
   
   const [selectedMethod, setSelectedMethod] = useState("upi"); // 'upi' | 'card' | 'netbanking' | 'cod'
-  const [upiId, setUpiId] = useState("parent@okaxis");
+  const [upiId, setUpiId] = useState("user@okaxis");
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [captchaInput, setCaptchaInput] = useState("");
