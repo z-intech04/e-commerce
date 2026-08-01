@@ -51,57 +51,32 @@ export default function ProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState("");
 
   // Addresses State
-  const [addresses, setAddresses] = useState([
-    {
-      id: "addr-1",
-      tag: "Home",
-      name: "Suresh Sharma",
-      phone: "+91 98765 43210",
-      line: "Flat 402, Royal Palms Apartments, Sector 4",
-      city: "Pune",
-      state: "Maharashtra",
-      pincode: "411038",
-      isDefault: true
-    },
-    {
-      id: "addr-2",
-      tag: "School Pickup",
-      name: "Aarav Sharma (Student ID)",
-      phone: "+91 98765 43210",
-      line: "School of Scholars Campus Counter 2, Sector 4",
-      city: "Pune",
-      state: "Maharashtra",
-      pincode: "411038",
-      isDefault: false
-    }
-  ]);
+  const [addresses, setAddresses] = useState([]);
   const [isAddAddrOpen, setIsAddAddrOpen] = useState(false);
-  const [newAddr, setNewAddr] = useState({ tag: "Home", name: "", phone: "", line: "", city: "Pune", pincode: "" });
+  const [newAddr, setNewAddr] = useState({ tag: "Home", name: "", phone: "", line: "", city: "", pincode: "" });
 
   // Saved Payments State
-  const [savedPayments, setSavedPayments] = useState([
-    { id: "pay-1", type: "UPI", label: "Google Pay / PhonePe", detail: "suresh@okicici", isDefault: true },
-    { id: "pay-2", type: "Card", label: "HDFC Bank Debit Card", detail: "•••• •••• •••• 4920", isDefault: false }
-  ]);
+  const [savedPayments, setSavedPayments] = useState([]);
 
   const fetchOrders = React.useCallback(async () => {
+    if (!user?.email) {
+      setOrders([]);
+      setLoadingOrders(false);
+      return;
+    }
     setLoadingOrders(true);
     try {
-      const email = user?.email || "parent@schoolofscholars.edu";
-      let res = await fetch(`/api/orders?email=${encodeURIComponent(email)}`);
-      let data = await res.json();
-      
-      // Fallback: if no specific email orders found, fetch all store orders so user never sees empty list
-      if (!data.orders || data.orders.length === 0) {
-        res = await fetch("/api/orders");
-        data = await res.json();
-      }
+      const res = await fetch(`/api/orders?email=${encodeURIComponent(user.email)}`);
+      const data = await res.json();
 
       if (data.success && Array.isArray(data.orders)) {
         setOrders(data.orders);
+      } else {
+        setOrders([]);
       }
     } catch (e) {
       console.error("Error loading user orders:", e);
+      setOrders([]);
     } finally {
       setLoadingOrders(false);
     }
@@ -111,7 +86,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setProfileName(user.name || "");
-      setProfilePhone(user.phone || "+91 98765 43210");
+      setProfilePhone(user.phone || "");
     }
     fetchOrders();
   }, [user, fetchOrders]);
@@ -574,7 +549,7 @@ export default function ProfilePage() {
                           type="text"
                           value={newAddr.name}
                           onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })}
-                          placeholder="e.g. Suresh Sharma"
+                          placeholder="e.g. Ramesh Sharma"
                           className="w-full p-2 bg-white border border-slate-300 rounded-xl"
                           required
                         />

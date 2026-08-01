@@ -15,16 +15,6 @@ export function AuthProvider({ children }) {
       const savedUser = localStorage.getItem("sos_auth_user");
       if (savedUser) {
         setUser(JSON.parse(savedUser));
-      } else {
-        const defaultUser = {
-          id: "usr-parent-1",
-          name: "Suresh Sharma",
-          email: "parent@schoolofscholars.edu",
-          phone: "+91 98765 43210",
-          role: "parent"
-        };
-        setUser(defaultUser);
-        localStorage.setItem("sos_auth_user", JSON.stringify(defaultUser));
       }
     } catch (e) {
       console.error("Failed to load saved user session:", e);

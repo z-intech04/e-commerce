@@ -67,14 +67,14 @@ export default function PaymentModal({ isOpen, onClose }) {
 
     // Prepare order payload
     const orderData = {
-      userEmail: user?.email || "parent@schoolofscholars.edu",
-      studentName: studentInfo.studentName || "Aarav Sharma",
-      rollNo: studentInfo.rollNo || "15",
+      userEmail: user?.email || "",
+      studentName: studentInfo.studentName || user?.name || "Student",
+      rollNo: studentInfo.rollNo || "",
       classGrade: studentInfo.classGrade || "Class 5",
       section: studentInfo.section || "A",
-      parentPhone: studentInfo.parentPhone || "+91 98765 43210",
+      parentPhone: studentInfo.parentPhone || user?.phone || "",
       deliveryType: studentInfo.deliveryType || "Home Delivery",
-      deliveryAddress: studentInfo.deliveryAddress || "Flat 402, Sunshine Apartments, Main Road",
+      deliveryAddress: studentInfo.deliveryAddress || "",
       paymentMethod: methodTitle,
       totalAmount: grandTotal,
       items: cart.map((item) => ({
@@ -137,7 +137,7 @@ export default function PaymentModal({ isOpen, onClose }) {
             </div>
             <h2 className="text-xl font-black tracking-tight">Order Checkout Summary</h2>
             <p className="text-xs text-slate-400 mt-1">
-              For Student: <strong className="text-white">{studentInfo.studentName || "Aarav Sharma"}</strong> ({studentInfo.classGrade})
+              For Student: <strong className="text-white">{studentInfo.studentName || user?.name || "Student"}</strong> ({studentInfo.classGrade})
             </p>
 
             <div className="mt-6 space-y-3 border-t border-slate-800 pt-4 text-xs">

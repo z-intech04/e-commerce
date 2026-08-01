@@ -16,20 +16,12 @@ export async function GET(request) {
       if (orderId) {
         query.$or = [{ orderId }, { _id: orderId }];
       } else if (email) {
-        query.$or = [
-          { userEmail: email }, 
-          { email: email }, 
-          { userEmail: { $exists: false } },
-          { userEmail: null }
-        ];
+        query.$or = [{ userEmail: email }, { email: email }];
       } else if (phone) {
         query.parentPhone = phone;
       }
 
-      let orders = await Order.find(query).sort({ createdAt: -1 });
-      if (orders.length === 0 && !orderId) {
-        orders = await Order.find({}).sort({ createdAt: -1 });
-      }
+      const orders = await Order.find(query).sort({ createdAt: -1 });
       return NextResponse.json({ success: true, orders });
     } else {
       const db = getInMemoryDB();
@@ -42,23 +34,17 @@ export async function GET(request) {
             o.orderId?.toUpperCase() === orderId
         );
       } else if (email || phone) {
-        const filtered = orders.filter((o) => {
+        orders = orders.filter((o) => {
           const matchEmail = email && ((o.userEmail || "").toLowerCase() === email || (o.email || "").toLowerCase() === email);
           const matchPhone = phone && ((o.parentPhone || "").includes(phone) || (o.phone || "").includes(phone));
           return matchEmail || matchPhone;
         });
-        
-        // If specific user has specific orders, show them! Otherwise fallback to all store orders
-        if (filtered.length > 0) {
-          orders = filtered;
-        }
       }
 
       return NextResponse.json({ success: true, orders });
     }
   } catch (error) {
-    const db = getInMemoryDB();
-    return NextResponse.json({ success: true, orders: db.orders });
+    return NextResponse.json({ success: false, orders: [], error: error.message });
   }
 }
 

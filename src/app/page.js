@@ -287,34 +287,40 @@ export default function HomePage() {
 
           {/* In Demand Product Carousel Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
-            {products.slice(0, 5).map((product) => (
-              <Link 
-                key={product.id} 
-                href={`/products/${product.id}`}
-                className="bg-white rounded-2xl p-3 shadow-xs border border-slate-200/80 hover:shadow-md transition-all group flex flex-col justify-between"
-              >
-                <div className="relative aspect-square mb-2 bg-slate-50 rounded-xl overflow-hidden p-2 flex items-center justify-center">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform" 
-                  />
-                  <span className="absolute top-1.5 left-1.5 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded">
-                    {product.grade}
-                  </span>
-                </div>
+            {products.slice(0, 5).map((product) => {
+              const prodId = product.id || product._id;
+              const prodImage = product.images?.[0] || product.image || "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&q=80&w=800";
+              const prodName = product.name || product.title || "School Item";
 
-                <div>
-                  <h4 className="text-xs font-extrabold text-slate-900 line-clamp-1 group-hover:text-[#2874f0]">
-                    {product.title}
-                  </h4>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs font-black text-slate-900">₹{product.price}</span>
-                    <span className="text-[10px] text-slate-400 line-through">₹{product.price + 200}</span>
+              return (
+                <Link 
+                  key={prodId} 
+                  href={`/products/${prodId}`}
+                  className="bg-white rounded-2xl p-3 shadow-xs border border-slate-200/80 hover:shadow-md transition-all group flex flex-col justify-between"
+                >
+                  <div className="relative aspect-square mb-2 bg-slate-50 rounded-xl overflow-hidden p-2 flex items-center justify-center">
+                    <img 
+                      src={prodImage} 
+                      alt={prodName} 
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform" 
+                    />
+                    <span className="absolute top-1.5 left-1.5 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded">
+                      {product.grade || "All"}
+                    </span>
                   </div>
-                </div>
-              </Link>
-            ))}
+
+                  <div>
+                    <h4 className="text-xs font-extrabold text-slate-900 line-clamp-1 group-hover:text-[#2874f0]">
+                      {prodName}
+                    </h4>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs font-black text-slate-900">₹{product.price}</span>
+                      <span className="text-[10px] text-slate-400 line-through">₹{product.originalPrice || (product.price + 200)}</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
         </div>

@@ -11,15 +11,6 @@ if (!global._inMemoryUsers) {
       password: "admin123",
       role: "admin",
       createdAt: new Date().toISOString()
-    },
-    {
-      id: "usr-parent-1",
-      name: "Suresh Sharma (Parent)",
-      email: "parent@schoolofscholars.edu",
-      password: "parent123",
-      role: "customer",
-      phone: "+91 98765 43210",
-      createdAt: new Date().toISOString()
     }
   ];
 }

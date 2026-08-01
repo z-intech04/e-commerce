@@ -36,14 +36,6 @@ export default function AuthModal() {
     setLoading(false);
   };
 
-  const handleQuickFillParent = async () => {
-    setEmail("parent@schoolofscholars.edu");
-    setPassword("parent123");
-    setLoading(true);
-    await login("parent@schoolofscholars.edu", "parent123");
-    setLoading(false);
-  };
-
   const handleQuickFillAdmin = async () => {
     setEmail("admin@schoolofscholars.edu");
     setPassword("admin123");
@@ -117,29 +109,19 @@ export default function AuthModal() {
           </div>
         )}
 
-        {/* Quick Demo Login Fillers */}
+        {/* Quick Admin Login Option */}
         {authMode === "login" && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-5 text-xs text-amber-950 space-y-2">
-            <div className="flex items-center gap-1.5 font-extrabold text-amber-900 text-[11px]">
-              <Sparkles className="w-4 h-4 text-amber-600" /> One-Click Quick Demo Sign In:
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3 mb-5 text-xs text-purple-950 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 font-bold text-purple-900 text-[11px]">
+              <ShieldCheck className="w-4 h-4 text-purple-700" /> Admin Access Demo:
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleQuickFillParent}
-                className="px-3 py-2 bg-white border border-amber-300 rounded-xl font-extrabold text-amber-900 hover:bg-amber-100 transition-all text-[11px] flex items-center justify-center gap-1"
-              >
-                <span>Parent Login</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleQuickFillAdmin}
-                className="px-3 py-2 bg-purple-900 text-white rounded-xl font-extrabold hover:bg-purple-800 transition-all text-[11px] flex items-center justify-center gap-1 shadow-sm"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin Login</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleQuickFillAdmin}
+              className="px-3 py-1.5 bg-purple-900 text-white rounded-xl font-extrabold hover:bg-purple-800 transition-all text-[11px] flex items-center gap-1 shadow-sm"
+            >
+              <span>Quick Admin Login</span>
+            </button>
           </div>
         )}
 
