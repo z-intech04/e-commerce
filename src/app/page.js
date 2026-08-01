@@ -17,7 +17,14 @@ import {
   RotateCcw, 
   CheckCircle,
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  Smartphone,
+  Laptop,
+  Tv,
+  Smile,
+  Coffee,
+  Trophy,
+  Package
 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import SizeGuideModal from "@/components/SizeGuideModal";
@@ -29,132 +36,287 @@ export default function HomePage() {
   const { selectedGrade, setSelectedGrade } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedCategoryLabel, setSelectedCategoryLabel] = useState("For You");
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
 
+  const [heroSettings, setHeroSettings] = useState({
+    couponTitle: "Exclusive coupon for you!",
+    couponDiscount: "Flat 10% Off",
+    couponSub: "Up to ₹500 on Grade Kits",
+    couponStatus: "Already applied",
+    card1Title: "Official Blazer & Uniform Sets",
+    card1Price: "From ₹1,499*",
+    card1Sub: "Pre-order 2026-27 Session",
+    card2Title: "Complete Grade NCERT Textbook Kits",
+    card2Discount: "Up to 25% Off",
+    card2Sub: "Includes Textbooks & Workbooks",
+    card3Title: "Casio Scientific Calculators & Bags",
+    card3Price: "Special ₹899",
+    card3Sub: "Approved for Class 9 to 12"
+  });
+
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/products");
-        const data = await res.json();
-        if (data.products) setProducts(data.products);
+        const [prodRes, setRes] = await Promise.all([
+          fetch("/api/products"),
+          fetch("/api/settings")
+        ]);
+        const prodData = await prodRes.json();
+        const setData = await setRes.json();
+        if (prodData.products) setProducts(prodData.products);
+        if (setData.success && setData.settings) setHeroSettings(setData.settings);
       } catch (e) {
-        console.error("Failed to load products:", e);
+        console.error("Failed to load products or settings:", e);
       } finally {
         setLoading(false);
       }
     }
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const filteredProducts = selectedGrade === "All Classes"
-    ? products
-    : products.filter(
-        (p) => p.grade === selectedGrade || p.grade === "All" || p.grade === "Class 1 to 12"
-      );
+  const filteredProducts = products.filter((p) => {
+    const matchGrade = selectedGrade === "All Classes" || p.grade === selectedGrade || p.grade === "All" || p.grade === "Class 1 to 12";
+    const matchCat = activeCategory === "All" || p.category === activeCategory;
+    return matchGrade && matchCat;
+  });
+
+  const categories = [
+    { label: "For You", icon: ShoppingBag, cat: "All" },
+    { label: "Uniforms", icon: Shirt, cat: "Uniforms" },
+    { label: "Textbook Kits", icon: BookOpen, cat: "Books & Notebooks" },
+    { label: "Stationery & Art", icon: PenTool, cat: "Stationery" },
+    { label: "Bags & Bottles", icon: Backpack, cat: "Bags & Accessories" },
+    { label: "Winter Wear", icon: Shirt, cat: "Uniforms" },
+    { label: "Sports & Fitness", icon: Trophy, cat: "Stationery" },
+    { label: "Tech & Calculators", icon: Laptop, cat: "Stationery" },
+    { label: "Exam Supplies", icon: ShieldCheck, cat: "Stationery" }
+  ];
 
   return (
-    <div className="space-y-12 pb-16">
+    <div className="space-y-6 pb-16 bg-slate-50 min-h-screen">
       
-      {/* HERO BANNER */}
-      <section className="relative bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 text-white overflow-hidden py-16 lg:py-24">
-        {/* Decorative Background Accents */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Hero Left Content */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-extrabold shadow-sm">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>Academic Session 2026-27 Supply Portal</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white">
-                Official Store for <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200">
-                  School of Scholars
-                </span>
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                Purchase verified grade-wise NCERT & CBSE textbook kits, tailored woolen blazers, house t-shirts, geometry sets, and orthopedic backpacks with direct campus distribution or home delivery.
-              </p>
-
-              {/* Action buttons */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
-                <Link
-                  href="/products"
-                  className="px-6 py-3.5 bg-amber-500 text-slate-950 rounded-xl font-black text-sm hover:bg-amber-400 transition-all shadow-lg hover:shadow-amber-500/25 flex items-center gap-2"
-                >
-                  <ShoppingBag className="w-4 h-4 text-slate-950" /> Shop Catalog Now
-                </Link>
-
+      {/* 1. RESPONSIVE CATEGORY ICON STRIP (NO VISIBLE SCROLLBAR & STRICT SINGLE ITEM SELECTION) */}
+      <section className="bg-white border-b border-slate-200 py-2 sm:py-3 shadow-xs sticky top-16 sm:top-20 z-30">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6">
+          <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-1 px-2">
+            {categories.map((cat, idx) => {
+              const IconComp = cat.icon;
+              // STRICT SINGLE ITEM SELECTION: Only match exact clicked label!
+              const isSelected = selectedCategoryLabel === cat.label;
+              
+              return (
                 <button
-                  onClick={() => setIsGradeModalOpen(true)}
-                  className="px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 backdrop-blur-xs"
+                  key={idx}
+                  onClick={() => {
+                    setSelectedCategoryLabel(cat.label);
+                    setActiveCategory(cat.cat);
+                  }}
+                  className="flex flex-col items-center gap-1.5 group shrink-0 relative px-1 sm:px-2 py-1 transition-all focus:outline-none"
                 >
-                  <SlidersHorizontal className="w-4 h-4 text-amber-300" /> Filter by Grade ({selectedGrade})
-                </button>
+                  {/* Category Graphic Box */}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all ${
+                    isSelected 
+                      ? "bg-blue-50 border-2 border-[#2874f0] text-[#2874f0] shadow-xs" 
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60"
+                  }`}>
+                    <IconComp className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.75]" />
+                  </div>
 
-                <button
-                  onClick={() => setIsSizeGuideOpen(true)}
-                  className="px-4 py-3.5 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 hover:underline"
-                >
-                  <Ruler className="w-4 h-4 text-amber-400" /> Blazer Size Chart
+                  {/* Category Label */}
+                  <span className={`text-[11px] sm:text-[12px] font-bold whitespace-nowrap ${
+                    isSelected ? "text-[#2874f0]" : "text-slate-700 group-hover:text-slate-900"
+                  }`}>
+                    {cat.label}
+                  </span>
+
+                  {/* Active Blue Underline Indicator */}
+                  {isSelected && (
+                    <div className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 w-8 sm:w-10 h-1 bg-[#2874f0] rounded-t-md animate-in fade-in" />
+                  )}
                 </button>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+      
+      {/* 2. EXCLUSIVE TICKET COUPON BANNER (Dynamic Admin Config) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="relative bg-[#0071e3] text-white rounded-2xl p-4 sm:p-6 shadow-md overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-600">
+          
+          {/* Ticket Left Notch */}
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-8 bg-slate-50 rounded-r-full border-r border-blue-700 hidden sm:block" />
+          {/* Ticket Right Notch */}
+          <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-8 bg-slate-50 rounded-l-full border-l border-blue-700 hidden sm:block" />
+
+          {/* Ticket Left Content */}
+          <div className="flex-1 text-center md:text-left pl-0 sm:pl-4">
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+              {heroSettings.couponTitle}
+            </h2>
+          </div>
+
+          {/* Vertical Divider */}
+          <div className="hidden md:block w-px h-16 bg-blue-400/40" />
+
+          {/* Ticket Right Content */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 pr-0 sm:pr-4 text-center sm:text-right">
+            <div>
+              <p className="text-2xl sm:text-3xl font-black">{heroSettings.couponDiscount}</p>
+              <p className="text-sm font-bold text-blue-100">{heroSettings.couponSub}</p>
+            </div>
+            <span className="px-5 py-2.5 bg-white text-[#0071e3] font-black text-sm rounded-full shadow-md whitespace-nowrap">
+              {heroSettings.couponStatus}
+            </span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 3. PROMOTIONAL HERO BANNER CARDS GRID (Dynamic Admin Config) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* CARD 1: Uniform Theme */}
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-64 shadow-lg border border-purple-900/50 group hover:scale-[1.01] transition-transform">
+            <div>
+              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">
+                SCHOOL OF SCHOLARS
+              </span>
+              <h3 className="text-xl font-black mt-2 leading-tight">
+                {heroSettings.card1Title}
+              </h3>
+              <p className="text-sm font-extrabold text-amber-300 mt-1">{heroSettings.card1Price}</p>
+              <p className="text-[10px] text-slate-300 font-medium mt-0.5">{heroSettings.card1Sub}</p>
             </div>
 
-            {/* Hero Right Widget: Quick Grade Selector Card */}
-            <div className="lg:col-span-5">
-              <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200/80 relative">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-900 text-amber-300 flex items-center justify-center font-bold shadow-xs">
-                      <GraduationCap className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-slate-900 text-base">Select Student Class</h3>
-                      <p className="text-xs text-slate-500">Auto-match textbook kits & sizes</p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-amber-100 text-amber-900 text-[11px] font-extrabold rounded-md">
-                    2026-27
+            {/* Graphic Illustration */}
+            <div className="absolute right-3 bottom-3 w-28 h-28 opacity-90 group-hover:scale-105 transition-transform">
+              <Shirt className="w-full h-full text-indigo-400/30" />
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/10 relative z-10">
+              <Link href="/products?category=Uniforms" className="text-xs font-bold text-white hover:underline flex items-center gap-1">
+                Shop Uniforms <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
+              </Link>
+              <span className="text-[9px] font-extrabold text-slate-400 bg-white/10 px-1.5 py-0.5 rounded">OFFICIAL</span>
+            </div>
+          </div>
+
+          {/* CARD 2: Textbook Kits Bundle Theme */}
+          <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 text-slate-900 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-64 shadow-lg border border-emerald-200 group hover:scale-[1.01] transition-transform">
+            <div>
+              <span className="text-[10px] font-black tracking-widest text-emerald-800 uppercase bg-emerald-200/60 px-2 py-0.5 rounded border border-emerald-300">
+                ACADEMIC BUNDLE
+              </span>
+              <h3 className="text-xl font-black mt-2 text-emerald-950 leading-tight">
+                {heroSettings.card2Title}
+              </h3>
+              <p className="text-sm font-black text-emerald-700 mt-1">{heroSettings.card2Discount}</p>
+              <p className="text-[10px] text-slate-600 font-semibold mt-0.5">{heroSettings.card2Sub}</p>
+            </div>
+
+            {/* Graphic Illustration */}
+            <div className="absolute right-3 bottom-8 w-28 h-28 opacity-90 group-hover:scale-105 transition-transform">
+              <BookOpen className="w-full h-full text-emerald-600/30" />
+            </div>
+
+            {/* Pagination Carousel Dots */}
+            <div className="flex items-center justify-center gap-1.5 my-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              <span className="w-4 h-1.5 rounded-full bg-[#2874f0]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 relative z-10">
+              <Link href="/products?category=Books%20%26%20Notebooks" className="text-xs font-bold text-emerald-900 hover:underline flex items-center gap-1">
+                Explore Kits <ChevronRight className="w-3.5 h-3.5 text-emerald-700" />
+              </Link>
+              <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-200/80 px-1.5 py-0.5 rounded">FEATURED</span>
+            </div>
+          </div>
+
+          {/* CARD 3: Student Tech Theme */}
+          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-64 shadow-lg border border-slate-800 group hover:scale-[1.01] transition-transform">
+            <div>
+              <span className="text-[10px] font-black tracking-widest text-sky-400 uppercase bg-sky-400/10 px-2 py-0.5 rounded border border-sky-400/30">
+                BOARD EXAM READY
+              </span>
+              <h3 className="text-xl font-black mt-2 leading-tight">
+                {heroSettings.card3Title}
+              </h3>
+              <p className="text-sm font-extrabold text-sky-300 mt-1">{heroSettings.card3Price}</p>
+              <p className="text-[10px] text-slate-300 font-medium mt-0.5">{heroSettings.card3Sub}</p>
+            </div>
+
+            {/* Graphic Illustration */}
+            <div className="absolute right-3 bottom-3 w-28 h-28 opacity-90 group-hover:scale-105 transition-transform">
+              <Laptop className="w-full h-full text-sky-400/30" />
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/10 relative z-10">
+              <Link href="/products?category=Stationery" className="text-xs font-bold text-white hover:underline flex items-center gap-1">
+                Shop Exam Tools <ChevronRight className="w-3.5 h-3.5 text-sky-400" />
+              </Link>
+              <span className="text-[9px] font-extrabold text-slate-400 bg-white/10 px-1.5 py-0.5 rounded">AD</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. "IN DEMAND" MINT GREEN PRODUCT SHELF (Exact Screenshot Match) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="bg-[#e6f7f3] rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-xs">
+          
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">In demand</h3>
+              <span className="px-2 py-0.5 bg-emerald-200 text-emerald-950 font-bold text-xs rounded-full">Hot Picks</span>
+            </div>
+
+            <Link href="/products" className="text-xs font-extrabold text-[#2874f0] hover:underline flex items-center gap-1">
+              View All <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* In Demand Product Carousel Cards Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+            {products.slice(0, 5).map((product) => (
+              <Link 
+                key={product.id} 
+                href={`/products/${product.id}`}
+                className="bg-white rounded-2xl p-3 shadow-xs border border-slate-200/80 hover:shadow-md transition-all group flex flex-col justify-between"
+              >
+                <div className="relative aspect-square mb-2 bg-slate-50 rounded-xl overflow-hidden p-2 flex items-center justify-center">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform" 
+                  />
+                  <span className="absolute top-1.5 left-1.5 bg-amber-500 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded">
+                    {product.grade}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {SCHOOL_CLASSES.slice(1, 10).map((cls) => (
-                    <button
-                      key={cls}
-                      onClick={() => setSelectedGrade(cls)}
-                      className={`py-2 px-2 rounded-xl text-xs font-extrabold border transition-all ${
-                        selectedGrade === cls
-                          ? "bg-blue-900 text-white border-blue-900 shadow-md scale-102"
-                          : "bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-900 hover:bg-blue-50"
-                      }`}
-                    >
-                      {cls}
-                    </button>
-                  ))}
+                <div>
+                  <h4 className="text-xs font-extrabold text-slate-900 line-clamp-1 group-hover:text-[#2874f0]">
+                    {product.title}
+                  </h4>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs font-black text-slate-900">₹{product.price}</span>
+                    <span className="text-[10px] text-slate-400 line-through">₹{product.price + 200}</span>
+                  </div>
                 </div>
-
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-950 font-medium flex items-center justify-between">
-                  <span>Active Selection: <strong>{selectedGrade}</strong></span>
-                  <Link
-                    href={`/products?grade=${encodeURIComponent(selectedGrade)}`}
-                    className="font-extrabold text-blue-900 hover:underline flex items-center gap-0.5"
-                  >
-                    View Items <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-
+              </Link>
+            ))}
           </div>
+
         </div>
       </section>
 

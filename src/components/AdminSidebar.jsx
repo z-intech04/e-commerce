@@ -10,7 +10,8 @@ import {
   ShieldCheck, 
   ArrowLeft,
   Menu,
-  X
+  X,
+  SlidersHorizontal
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -21,6 +22,7 @@ export default function AdminSidebar() {
     { href: "/admin", label: "Dashboard Overview", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products Catalog Manager", icon: Package },
     { href: "/admin/orders", label: "Student Orders Manager", icon: ShoppingBag },
+    { href: "/admin/settings", label: "Hero Banner Settings", icon: SlidersHorizontal },
   ];
 
   return (

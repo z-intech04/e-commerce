@@ -20,8 +20,11 @@ import {
   RefreshCw
 } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function PaymentModal({ isOpen, onClose }) {
   const router = useRouter();
+  const { user } = useAuth();
   const { cart, subtotal, deliveryFee, grandTotal, studentInfo, clearCart } = useCart();
   
   const [selectedMethod, setSelectedMethod] = useState("upi"); // 'upi' | 'card' | 'netbanking' | 'cod'
@@ -64,6 +67,7 @@ export default function PaymentModal({ isOpen, onClose }) {
 
     // Prepare order payload
     const orderData = {
+      userEmail: user?.email || "parent@schoolofscholars.edu",
       studentName: studentInfo.studentName || "Aarav Sharma",
       rollNo: studentInfo.rollNo || "15",
       classGrade: studentInfo.classGrade || "Class 5",
