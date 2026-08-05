@@ -68,10 +68,32 @@ export async function POST(request) {
       { status: "Delivered", title: body.deliveryType === "School Pickup" ? "Handed Over" : "Delivered", description: "Order complete", date: "Pending", completed: false }
     ];
 
+    const safeDeliveryAddress =
+      body.deliveryAddress ||
+      (body.deliveryType === "School Pickup" ? "School Campus Counter Gate 2" : "Home Address");
+
+    const formattedItems = (body.items || []).map((item) => ({
+      id: String(item.id || item._id || item.name || "item"),
+      name: item.name || "School Product",
+      price: Number(item.price || 0),
+      quantity: Number(item.quantity || 1),
+      selectedSize: item.selectedSize || "Standard"
+    }));
+
     const orderData = {
       orderId,
       id: orderId,
-      ...body,
+      userEmail: body.userEmail || "",
+      studentName: body.studentName || "Student",
+      rollNo: body.rollNo || "",
+      classGrade: body.classGrade || "Class 5",
+      section: body.section || "A",
+      parentPhone: body.parentPhone || "",
+      deliveryType: body.deliveryType || "Home Delivery",
+      deliveryAddress: safeDeliveryAddress,
+      paymentMethod: body.paymentMethod || "UPI",
+      totalAmount: Number(body.totalAmount || 0),
+      items: formattedItems,
       paymentStatus: body.paymentMethod === "Cash on Delivery (COD)" ? "Pending" : "Paid",
       orderStatus: "Processing",
       timeline: body.timeline || defaultTimeline,
@@ -84,8 +106,15 @@ export async function POST(request) {
     const conn = await connectToDatabase();
 
     if (conn) {
-      const newOrder = await Order.create(orderData);
-      return NextResponse.json({ success: true, order: newOrder });
+      try {
+        const newOrder = await Order.create(orderData);
+        return NextResponse.json({ success: true, order: newOrder });
+      } catch (dbErr) {
+        console.warn("MongoDB order insert warning, saving to in-memory fallback:", dbErr.message);
+        const db = getInMemoryDB();
+        db.orders.unshift(orderData);
+        return NextResponse.json({ success: true, order: orderData });
+      }
     } else {
       const db = getInMemoryDB();
       db.orders.unshift(orderData);

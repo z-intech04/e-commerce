@@ -99,70 +99,73 @@ export default function CartPage() {
         {/* LEFT 7 COLS: CART ITEMS LIST */}
         <div className="lg:col-span-7 space-y-4">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs divide-y divide-slate-100 overflow-hidden">
-            {cart.map((item, index) => (
-              <div key={`${item.product.id}-${item.selectedSize}-${index}`} className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="flex items-center gap-3.5 flex-1 min-w-0 w-full sm:w-auto">
-                  <img
-                    src={item.product.images?.[0] || "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&q=80&w=800"}
-                    alt={item.product.name}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-200 shrink-0 bg-slate-50"
-                  />
+            {cart.map((item, index) => {
+              const productId = item.product.id || item.product._id;
+              return (
+                <div key={`${productId}-${item.selectedSize}-${index}`} className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0 w-full sm:w-auto">
+                    <img
+                      src={item.product.images?.[0] || "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&q=80&w=800"}
+                      alt={item.product.name}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-200 shrink-0 bg-slate-50"
+                    />
 
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 bg-blue-900 text-white font-bold text-[9px] rounded uppercase">
-                        {item.product.category}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-bold">
-                        Grade: {item.product.grade}
-                      </span>
-                    </div>
-
-                    <h3 className="font-bold text-slate-900 text-sm truncate">{item.product.name}</h3>
-
-                    <div className="text-xs text-slate-500 flex items-center gap-3">
-                      <span>Size: <strong className="text-slate-900 font-extrabold">{item.selectedSize}</strong></span>
-                      {item.customName && (
-                        <span className="text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
-                          Tag: {item.customName} (+₹50)
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-blue-900 text-white font-bold text-[9px] rounded uppercase">
+                          {item.product.category}
                         </span>
-                      )}
-                    </div>
+                        <span className="text-[10px] text-slate-400 font-bold">
+                          Grade: {item.product.grade}
+                        </span>
+                      </div>
 
-                    <div className="font-extrabold text-slate-900 text-sm pt-1">
-                      ₹{item.product.price.toLocaleString("en-IN")}{" "}
-                      <span className="text-[10px] text-slate-400 font-normal">/ unit</span>
+                      <h3 className="font-bold text-slate-900 text-sm truncate">{item.product.name}</h3>
+
+                      <div className="text-xs text-slate-500 flex items-center gap-3">
+                        <span>Size: <strong className="text-slate-900 font-extrabold">{item.selectedSize}</strong></span>
+                        {item.customName && (
+                          <span className="text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
+                            Tag: {item.customName} (+₹50)
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="font-extrabold text-slate-900 text-sm pt-1">
+                        ₹{item.product.price.toLocaleString("en-IN")}{" "}
+                        <span className="text-[10px] text-slate-400 font-normal">/ unit</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Quantity Controls & Delete */}
-                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-3 shrink-0">
-                  <div className="flex items-center border border-slate-300 rounded-xl bg-slate-50">
+                  {/* Quantity Controls & Delete */}
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-3 shrink-0">
+                    <div className="flex items-center border border-slate-300 rounded-xl bg-slate-50">
+                      <button
+                        onClick={() => updateQuantity(productId, item.selectedSize, item.quantity - 1)}
+                        className="p-1.5 text-slate-600 hover:text-slate-900"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="px-3 text-xs font-black text-slate-900">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(productId, item.selectedSize, item.quantity + 1)}
+                        className="p-1.5 text-slate-600 hover:text-slate-900"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1)}
-                      className="p-1.5 text-slate-600 hover:text-slate-900"
+                      onClick={() => removeFromCart(productId, item.selectedSize)}
+                      className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 font-bold"
                     >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="px-3 text-xs font-black text-slate-900">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1)}
-                      className="p-1.5 text-slate-600 hover:text-slate-900"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" /> Remove
                     </button>
                   </div>
-
-                  <button
-                    onClick={() => removeFromCart(item.product.id, item.selectedSize)}
-                    className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 font-bold"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> Remove
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Delivery Option Switcher */}

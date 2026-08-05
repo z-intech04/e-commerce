@@ -48,17 +48,7 @@ export default function AuthModal() {
     }
   };
 
-  const handleQuickFillAdmin = async () => {
-    setEmail("admin@schoolofscholars.edu");
-    setPassword("admin123");
-    setLoading(true);
-    const res = await login("admin@schoolofscholars.edu", "admin123");
-    setLoading(false);
-    if (res?.success) {
-      setEmail("");
-      setPassword("");
-    }
-  };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -125,21 +115,7 @@ export default function AuthModal() {
           </div>
         )}
 
-        {/* Quick Admin Login Option */}
-        {authMode === "login" && (
-          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3 mb-5 text-xs text-purple-950 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 font-bold text-purple-900 text-[11px]">
-              <ShieldCheck className="w-4 h-4 text-purple-700" /> Admin Access Demo:
-            </div>
-            <button
-              type="button"
-              onClick={handleQuickFillAdmin}
-              className="px-3 py-1.5 bg-purple-900 text-white rounded-xl font-extrabold hover:bg-purple-800 transition-all text-[11px] flex items-center gap-1 shadow-sm"
-            >
-              <span>Quick Admin Login</span>
-            </button>
-          </div>
-        )}
+
 
         {/* Auth Form */}
         <form onSubmit={handleSubmit} className="space-y-3 text-xs font-medium">

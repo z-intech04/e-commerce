@@ -108,7 +108,7 @@ export default function PaymentModal({ isOpen, onClose }) {
         onClose();
         router.push(`/order-success/${data.order.orderId || data.order._id}`);
       } else {
-        alert("Failed to record order. Please try again.");
+        alert(data.error || "Failed to record order. Please try again.");
       }
     } catch (e) {
       console.error(e);

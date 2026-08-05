@@ -114,6 +114,8 @@ export function CartProvider({ children }) {
     } catch (e) {}
   }, [selectedGrade]);
 
+  const getProductId = (p) => String(p?.id || p?._id || p?.name || "");
+
   const addToCart = (product, size = "Standard", quantity = 1, customName = "") => {
     if (!user?.email) {
       if (requireAuth) {
@@ -122,14 +124,22 @@ export function CartProvider({ children }) {
       return;
     }
 
+    const targetId = getProductId(product);
+    if (!targetId) return;
+
     setCart((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) => item.product.id === product.id && item.selectedSize === size
-      );
+      const existingIndex = prev.findIndex((item) => {
+        const itemId = getProductId(item.product);
+        return itemId === targetId && item.selectedSize === size;
+      });
 
       if (existingIndex > -1) {
         const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + quantity,
+          customName: customName || updated[existingIndex].customName
+        };
         return updated;
       } else {
         return [...prev, { product, selectedSize: size, quantity, customName }];
@@ -138,7 +148,13 @@ export function CartProvider({ children }) {
   };
 
   const removeFromCart = (productId, size) => {
-    setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.selectedSize === size)));
+    const targetId = String(productId || "");
+    setCart((prev) =>
+      prev.filter((item) => {
+        const itemId = getProductId(item.product);
+        return !(itemId === targetId && item.selectedSize === size);
+      })
+    );
   };
 
   const updateQuantity = (productId, size, newQty) => {
@@ -146,12 +162,14 @@ export function CartProvider({ children }) {
       removeFromCart(productId, size);
       return;
     }
+    const targetId = String(productId || "");
     setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId && item.selectedSize === size
+      prev.map((item) => {
+        const itemId = getProductId(item.product);
+        return itemId === targetId && item.selectedSize === size
           ? { ...item, quantity: newQty }
-          : item
-      )
+          : item;
+      })
     );
   };
 

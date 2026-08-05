@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryDB } from "@/lib/db";
 import Product from "@/models/Product";
+import mongoose from "mongoose";
 
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
     const conn = await connectToDatabase();
 
-    if (conn) {
+    if (conn && mongoose.Types.ObjectId.isValid(id)) {
       const product = await Product.findById(id);
       if (product) {
         return NextResponse.json({ success: true, product });
@@ -32,7 +33,7 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const conn = await connectToDatabase();
 
-    if (conn) {
+    if (conn && mongoose.Types.ObjectId.isValid(id)) {
       const updated = await Product.findByIdAndUpdate(id, body, { new: true });
       if (updated) return NextResponse.json({ success: true, product: updated });
     }
@@ -55,7 +56,7 @@ export async function DELETE(request, { params }) {
     const { id } = await params;
     const conn = await connectToDatabase();
 
-    if (conn) {
+    if (conn && mongoose.Types.ObjectId.isValid(id)) {
       await Product.findByIdAndDelete(id);
     }
 

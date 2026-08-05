@@ -427,7 +427,7 @@ export default function Navbar() {
                       <span>Grade: {selectedGrade}</span>
                     </button>
 
-                    {user?.role === "admin" && (
+                    {(user?.role === "admin" || user?.role === "superadmin") && (
                       <Link
                         href="/admin"
                         onClick={() => setIsMoreMenuOpen(false)}
@@ -435,6 +435,17 @@ export default function Navbar() {
                       >
                         <ShieldCheck className="w-4 h-4 text-purple-700" />
                         <span>Admin Control Panel</span>
+                      </Link>
+                    )}
+
+                    {user?.role === "superadmin" && (
+                      <Link
+                        href="/super-admin"
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 bg-amber-50 text-amber-950 hover:bg-amber-100 text-xs font-black rounded-xl border border-amber-300"
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-600" />
+                        <span>Z INTECH Command Center</span>
                       </Link>
                     )}
                   </div>
@@ -506,6 +517,13 @@ export default function Navbar() {
                 <User className="w-4 h-4 text-[#2874f0]" />
                 <span>My Profile & Order History</span>
               </Link>
+
+              {user?.role === "superadmin" && (
+                <Link href="/super-admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-400 text-slate-950 font-black shadow-xs">
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  <span>Z INTECH Command Center</span>
+                </Link>
+              )}
 
               <Link href="/track-order" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-50 text-amber-900 font-black">
                 <Truck className="w-4 h-4 text-amber-600" />

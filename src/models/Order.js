@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const OrderItemSchema = new mongoose.Schema({
-  id: { type: String, required: true },
+  id: { type: String, default: "" },
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
@@ -11,16 +11,17 @@ const OrderItemSchema = new mongoose.Schema({
 const OrderSchema = new mongoose.Schema(
   {
     orderId: { type: String, required: true, unique: true },
+    userEmail: { type: String, default: "" },
     studentName: { type: String, required: true },
-    rollNo: { type: String, required: true },
+    rollNo: { type: String, default: "" },
     classGrade: { type: String, required: true },
     section: { type: String, default: "A" },
     parentPhone: { type: String, required: true },
-    deliveryType: { type: String, enum: ["School Pickup", "Home Delivery"], default: "Home Delivery" },
-    deliveryAddress: { type: String, required: true },
+    deliveryType: { type: String, default: "Home Delivery" },
+    deliveryAddress: { type: String, default: "" },
     paymentMethod: { type: String, required: true },
-    paymentStatus: { type: String, enum: ["Paid", "Pending", "Failed"], default: "Paid" },
-    orderStatus: { type: String, enum: ["Processing", "Confirmed", "Shipped", "Delivered", "Cancelled"], default: "Processing" },
+    paymentStatus: { type: String, default: "Paid" },
+    orderStatus: { type: String, default: "Processing" },
     totalAmount: { type: Number, required: true },
     items: [OrderItemSchema]
   },

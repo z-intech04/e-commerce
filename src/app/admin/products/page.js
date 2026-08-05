@@ -188,6 +188,27 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleToggleStockStatus = async (product) => {
+    const prodId = product.id || product._id;
+    const isCurrentlyInStock = (product.stockCount > 0) && product.inStock !== false;
+    const newStockCount = isCurrentlyInStock ? 0 : 50;
+    const newInStock = !isCurrentlyInStock;
+
+    try {
+      await fetch(`/api/products/${prodId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stockCount: newStockCount,
+          inStock: newInStock
+        })
+      });
+      await fetchProducts();
+    } catch (e) {
+      alert("Failed to update product stock status.");
+    }
+  };
+
   const handleClearProducts = async () => {
     if (!confirm("Are you sure you want to delete ALL products from store catalog? You can then add new products from scratch.")) return;
     try {
@@ -458,11 +479,27 @@ export default function AdminProductsPage() {
                           <td className="px-4 py-3 font-black text-slate-900 whitespace-nowrap">₹{prod.price}</td>
 
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded font-extrabold text-[10px] ${
-                              prod.stockCount > 0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
-                            }`}>
-                              {prod.stockCount} units
-                            </span>
+                            <button
+                              onClick={() => handleToggleStockStatus(prod)}
+                              className={`px-2.5 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all shadow-xs border flex items-center gap-1 cursor-pointer active:scale-95 ${
+                                (prod.stockCount > 0 && prod.inStock !== false)
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                                  : "bg-red-50 text-red-800 border-red-300 hover:bg-red-100"
+                              }`}
+                              title="Click to toggle product between In-Stock & Out-of-Stock"
+                            >
+                              {(prod.stockCount > 0 && prod.inStock !== false) ? (
+                                <>
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>In Stock ({prod.stockCount})</span>
+                                </>
+                              ) : (
+                                <>
+                                  <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                                  <span>Out of Stock (0)</span>
+                                </>
+                              )}
+                            </button>
                           </td>
 
                           <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
